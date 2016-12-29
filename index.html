@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JS Drum Kit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+  <div class="keys">
+    <div data-key="65" class="key">
+      <kbd>A</kbd>
+      <span class="sound">clap</span>
+    </div>
+    <div data-key="83" class="key">
+      <kbd>S</kbd>
+      <span class="sound">hihat</span>
+    </div>
+    <div data-key="68" class="key">
+      <kbd>D</kbd>
+      <span class="sound">kick</span>
+    </div>
+    <div data-key="70" class="key">
+      <kbd>F</kbd>
+      <span class="sound">openhat</span>
+    </div>
+    <div data-key="71" class="key">
+      <kbd>G</kbd>
+      <span class="sound">boom</span>
+    </div>
+    <div data-key="72" class="key">
+      <kbd>H</kbd>
+      <span class="sound">ride</span>
+    </div>
+    <div data-key="74" class="key">
+      <kbd>J</kbd>
+      <span class="sound">snare</span>
+    </div>
+    <div data-key="75" class="key">
+      <kbd>K</kbd>
+      <span class="sound">tom</span>
+    </div>
+    <div data-key="76" class="key">
+      <kbd>L</kbd>
+      <span class="sound">tink</span>
+    </div>
+  </div>
+
+
+
+  <audio data-key="65" src="sounds/clap.wav"></audio>
+  <audio data-key="83" src="sounds/hihat.wav"></audio>
+  <audio data-key="68" src="sounds/kick.wav"></audio>
+  <audio data-key="70" src="sounds/openhat.wav"></audio>
+  <audio data-key="71" src="sounds/boom.wav"></audio>
+  <audio data-key="72" src="sounds/ride.wav"></audio>
+  <audio data-key="74" src="sounds/snare.wav"></audio>
+  <audio data-key="75" src="sounds/tom.wav"></audio>
+  <audio data-key="76" src="sounds/tink.wav"></audio>
+
+<script>
+
+  var count = 0;
+  var end = 0;
+  var start = 0;
+  var myBeat = [];
+
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
+  };
+
+  function playDatKey( e ) {
+
+      //console.log( `played with ${e.keyCode}` );
+      const audio = document.querySelector( `audio[data-key="${e.keyCode}"]` );
+      const key = document.querySelector( `.key[data-key="${e.keyCode}"]` );
+      if (!audio) return;
+
+      audio.currentTime = 0;
+      key.classList.remove( 'playing' );
+
+      key.classList.add( 'playing' );
+
+      audio.addEventListener( 'ended', function( e ) {
+        key.classList.remove( 'playing' );
+      });
+      audio.addEventListener( 'stalled', function( e ) {
+        console.error( 'Stalled!' );
+      });
+      
+      audio.play();
+  };
+
+  function runDatBeat( myBeat ) {
+    const myBeats = myBeat;
+    
+      myBeats.forEach(keyObj => {
+        //console.log(keyObj);
+        setTimeout(() => {
+          playDatKey( { keyCode: keyObj.keyCode } );
+        }, keyObj.delay );
+      });
+  };
+
+  window.addEventListener('keydown', function( e ) {
+    if (start > 0) {
+      end = performance.now();
+      console.log(`in record mode
+                    \nthis delay was ${end-start}`);
+      count = end - start;
+    } else {
+      start = performance.now();
+      count = 0;
+    }
+    
+    console.log(count);
+    myBeat.push( { keyCode: e.keyCode, delay: count } );
+    runDatBeat( myBeat );
+  });
+
+</script>
+
+
+</body>
+</html>
